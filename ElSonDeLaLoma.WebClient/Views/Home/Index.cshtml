@@ -1,0 +1,69 @@
+﻿<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3&key=AIzaSyAH8hDYcg2coprpxbr2lV19D8DTfwTvhoI&sensor=true">
+</script>
+
+<script type="text/javascript">
+    var map;
+
+    $(document).ready(function () {
+        console.log("ready!");
+        var mapOptions = {
+            center: new google.maps.LatLng(18.269112, -66.388962),
+            zoom: 8,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+
+        map = new google.maps.Map(document.getElementById("map_canvas"),
+                mapOptions);
+
+        google.maps.event.addListenerOnce(map, 'idle', function () {
+            LoadPromos();
+        });
+    });
+
+    function LoadPromos() {
+        $.ajax({
+            type: 'GET',
+            contentType: 'application/json',
+            url: '/api/Promo',
+            dataType: "json",
+            data: null,
+            success: function (data, textStatus, jqXHR) {
+
+                for (var i = 0; i < data.length; i++) {
+                    var latlong = data[i].LatLong.split(',')
+                    addMarker({ Name: data[i].Name, Lat: latlong[0], Longi: latlong[1] });
+                }
+            },
+            error: ajaxError
+        });
+    }
+
+
+    // Function for adding a marker to the page.
+    function addMarker(location) {
+
+        var myLatlng = new google.maps.LatLng(location.Lat, location.Longi);
+
+        var marker = new google.maps.Marker({
+            position: myLatlng,
+            map: map,
+            title: location.Name
+        });
+    }
+
+</script>
+
+<div class="starter-template">
+    <h1>Bienvenido a El Son de la Loma</h1>
+    <p>
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed
+        do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+        enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
+        ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+        reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+        culpa qui officia deserunt mollit anim id est laborum.
+    </p>
+    <img src="//s3.amazonaws.com/elsondelaloma/banner600x100.jpg">
+    <div id="map_canvas" style="width: 100%; height: 485px"></div>    
+</div>

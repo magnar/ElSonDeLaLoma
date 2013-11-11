@@ -1,0 +1,180 @@
+﻿<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3&key=AIzaSyAH8hDYcg2coprpxbr2lV19D8DTfwTvhoI&sensor=true">
+</script>
+
+<script type="text/javascript">
+    $(function () {
+
+       // $("#startDate").datepicker($.datepicker.regional["es"]);
+      //  $("#endDate").datepicker($.datepicker.regional["es"]);
+
+        $('#termsCheckbox').mousedown(function () {
+            if (!$(this).is(':checked')) {
+                $("#saveButton").removeAttr("disabled");
+            } else {
+                $("#saveButton").attr("disabled", "disabled");
+            }
+        });
+
+        $('#saveButton').click(function () {
+            $('#saveButton').hide();
+            addPromo();
+            return false;
+        });
+
+        $('#cancelButton').click(function () {
+            location.href = 'index.html';
+            return false;
+        });
+
+        $('#findMeButton').click(function () {
+            findMe();
+        });
+
+    });
+
+    function addPromo() {
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json',
+            url: '/api/Promo',
+            dataType: "json",
+            data: formToJSON(),
+            success: function (data, textStatus, jqXHR) {
+                alert('Promo created successfully');
+            },
+            error: ajaxError
+        });
+
+        $('#saveButton').show();
+    }
+
+</script>
+
+<script type="text/javascript">
+    var map;
+    var marker;
+
+    $(document).ready(function () {
+    
+        var mapOptions = {
+            center: new google.maps.LatLng(-34.397, 150.644),
+            zoom: 10,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+
+        map = new google.maps.Map(document.getElementById("map_canvas"),
+                mapOptions);
+
+        google.maps.event.addListener(map, 'center_changed', centerChanged);
+
+        centerChanged();
+
+    });
+
+    function centerChanged() {
+        var center = map.getCenter()
+        document.getElementById('latlng').value = center.toUrlValue();
+
+        if (marker)
+            marker.setMap(null);
+
+        marker = new google.maps.Marker({
+            position: center,
+            title: "Lugar de tu Promo"
+        });
+
+        marker.setMap(map);
+    }
+
+
+    function findMe() {
+        findLocation(showMe);
+
+        function showMe(pos) {
+            //$('#latlng').val(pos.lat + ',' + pos.long);
+            var myLatLng = new google.maps.LatLng(pos.lat, pos.long);
+            map.setCenter(myLatLng);
+        }
+    }
+
+    // Helper function to serialize all the form fields into a JSON string
+    function formToJSON() {
+        var j = JSON.stringify({
+            "name": $('#name').val(),
+            "description": $('#description').val(),
+            "startDate": $('#startDate').val(),
+            "endDate": $('#endDate').val(),
+            "email": $('#email').val(),
+            "LatLong": $('#latlng').val(),
+        });
+
+        return j;
+    }
+
+</script>
+
+<div class="starter-template">
+    <h1>Promo Nueva</h1>
+    <p>Por favor llene toda la información. No olvide escoger en el mapa el lugar de su promo. Se le enviara un correo para activar la misma.</p>
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="span4">
+                <form id="promo" autocomplete="off">
+                    <fieldset>
+                        <legend>Detalles de la Promo</legend>
+                        <label>Nombre Promo</label>
+                        <input id="name" type="text" placeholder="El nombre de la promo...">
+                        <label>Descripción</label>
+                        <textarea id="description" rows="5" placeholder="Dirección, teléfono, contacto, cosas así..."></textarea>
+                        <label>Comienzo Promo</label>
+                        <input id="startDate" type="text" title="Fecha que comienza la promo. Si desea, puede añadir la hora también. Por favor entre la fecha de la siguiente forma: día/mes/año" placeholder="día/mes/año" id="startPromo">
+                        <label>Fin Promo</label>
+                        <input id="endDate" type="text" title="Fecha que termina la promo. Si desea, puede añadir la hora también. Por favor entre la fecha de la siguiente forma: día/mes/año" placeholder="día/mes/año" id="endPromo">
+                        <label>Email</label>
+                        <input id="email" type="email" placeholder="Email...">
+                        <label>Coordenadas</label>
+                        <input id="latlng" type="text" title="Puedes usar el mapa para buscar el lugar de tu promo. Coloca el icono sobre el lugar y las coordenadas se registran automáticamente. También puedes escribirlas si deseas.">
+                        <button id="findMeButton" type="button" class="btn"></button>
+                        <hr>
+                        <label class="checkbox">
+                            <input id="termsCheckbox" type="checkbox">Acepto los <a href="#termsModal" data-toggle="modal">Términos y Condiciones</a>
+                        </label>
+                        <button id="saveButton" type="button" class="btn btn-primary" disabled="disabled">Guardar Promo</button>
+                        <button id="cancelButton" type="button" class="btn">Cancelar</button>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="span7">
+                <div id="map_canvas" style="width: 600px; height: 485px"></div>
+                <hr>
+                <img src="//s3.amazonaws.com/elsondelaloma/banner600x100.jpg">
+            </div>
+            <!-- Modals -->
+            <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h3 id="myModalLabel">Modal header</h3>
+                </div>
+                <div class="modal-body">
+                    <p>One fine body…</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                    <button class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+            <div id="termsModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h3 id="myModalLabel">Términos y Condiciones</h3>
+                </div>
+                <div class="modal-body">
+                    <p>El uso de esta aplicación es para entretenimiento. No se provee ninguna garantía y no somos responsables por la información aquí presente.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
