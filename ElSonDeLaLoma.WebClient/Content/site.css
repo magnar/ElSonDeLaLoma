@@ -6,3 +6,11 @@
     padding: 40px 15px;
     text-align: center;
 }
+
+.jumbotron {
+    border-radius: 5px;
+}
+
+.adsBanner {
+    margin-top: 5px;
+}
